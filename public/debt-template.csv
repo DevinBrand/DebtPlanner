@@ -1,0 +1,5 @@
+Debt Name,Current Balance,Minimum Payment,Interest Rate (%),Debt Type,Priority
+Credit Card 1,5000,150,18.99,credit_card,high
+Student Loan,25000,300,6.5,student_loan,medium
+Car Loan,15000,400,4.2,auto_loan,low
+Personal Loan,8000,200,12.5,personal_loan,high
