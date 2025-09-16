@@ -44,16 +44,43 @@ export function DebtUpload({ userData, setUserData }: DebtUploadProps) {
       complete: (results) => {
         try {
           const debts: Debt[] = results.data
-            .filter((row: any) => row['Debt Name'] && row['Current Balance'])
-            .map((row: any) => ({
-              id: generateId(),
-              name: row['Debt Name'],
-              balance: parseFloat(row['Current Balance']) || 0,
-              minimumPayment: parseFloat(row['Minimum Payment']) || 0,
-              interestRate: parseFloat(row['Interest Rate (%)']) || 0,
-              type: row['Debt Type'] as Debt['type'] || 'other',
-              priority: row['Priority'] as Debt['priority'] || 'medium'
-            }))
+            .filter((row: any) => row['name'] && row['current_amount'])
+            .map((row: any) => {
+              // Map your priority numbers to priority levels
+              const priorityMap: Record<string, 'high' | 'medium' | 'low'> = {
+                '1': 'high',
+                '2': 'high', 
+                '3': 'medium',
+                '4': 'medium',
+                '5': 'low',
+                '6': 'low'
+              }
+              
+              // Map your types to our type system
+              const typeMap: Record<string, Debt['type']> = {
+                'credit_card': 'credit_card',
+                'student_loan': 'student_loan',
+                'auto_loan': 'auto_loan',
+                'mortgage': 'mortgage',
+                'personal_loan': 'personal_loan',
+                'overdue bill': 'other',
+                'overdue bill for services': 'other',
+                'short term financing': 'personal_loan',
+                'intermediate loan': 'auto_loan',
+                'short term loan': 'personal_loan',
+                'long term loan': 'student_loan'
+              }
+              
+              return {
+                id: row['id'] || generateId(),
+                name: `${row['debtor']}: ${row['name']}`,
+                balance: parseFloat(row['current_amount']) || 0,
+                minimumPayment: parseFloat(row['minimum_monthly_payment']) || 0,
+                interestRate: parseFloat(row['interest_rate']?.replace('%', '')) || 0,
+                type: typeMap[row['type']] || 'other',
+                priority: priorityMap[row['snowball_priority']] || 'medium'
+              }
+            })
 
           setUserData({
             ...userData,
@@ -169,7 +196,7 @@ export function DebtUpload({ userData, setUserData }: DebtUploadProps) {
 
         <Dropzone
           onDrop={handleFileUpload}
-          accept={['.csv']}
+          accept={['text/csv']}
           maxFiles={1}
         >
           <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
